@@ -24,7 +24,7 @@ graph TD
     subgraph MasterGroup ["👑 Master Server (Orchestrator)"]
         direction TB
         APIGateway["🚪 API Gateway / Load Balancer"]
-        ShardingLogic["🧮 Sharding & Router Logic<br/>(Hash(key) → Node IP)"]
+        ShardingLogic["🧮 Sharding & Router Logic<br/>(Hash key → Node IP)"]
         MetadataStore[("📒 Cluster Metadata<br/>(Node Inventory & Health)")]
     end
 
@@ -41,10 +41,11 @@ graph TD
     APIGateway --> ShardingLogic
     ShardingLogic -.->|"Lookup Active Nodes"| MetadataStore
     
-    %% Replication Flow (Fan-out) - FIXED SYNTAX BELOW
-    ShardingLogic ==>|2. Stream Data (Replica 1)| Node1
-    ShardingLogic ==>|2. Stream Data (Replica 2)| Node2
-    ShardingLogic -.->|2. Stream Data (Replica 3 - Optional)| Node3
+    %% Replication Flow (Fan-out)
+    %% CHANGED: Used HTML codes for parentheses to fix parser error
+    ShardingLogic ==>|2. Stream Data #40;Replica 1#41;| Node1
+    ShardingLogic ==>|2. Stream Data #40;Replica 2#41;| Node2
+    ShardingLogic -.->|2. Stream Data #40;Replica 3 - Optional#41;| Node3
 
     %% Node Indepedence
     Node1 --- Disk1[(Disk 1)]
@@ -57,3 +58,35 @@ graph TD
     style Node1 fill:#e8f5e9,stroke:#2e7d32,color:#000
     style Node2 fill:#e8f5e9,stroke:#2e7d32,color:#000
     style Node3 fill:#e8f5e9,stroke:#2e7d32,color:#000
+```
+
+## Storage Engine Architecture
+
+```mermaid
+graph TD
+    subgraph NodeInternals ["Storage Node (Single Go Binary)"]
+        direction TB
+        
+        %% Network Interface Layer
+        HttpLayer[("📢 Network Layer<br/>(Go net/http Listener)")]
+        
+        %% Business Logic Layer
+        LogicLayer["⚙️ Business Logic / API Handler<br/>(Validation, TTL, Stream handling)"]
+        
+        %% Storage Engine Layer
+        BadgerEngine[("🦁 Embedded Storage Engine<br/>(BadgerDB Library)")]
+        
+        %% Physical Storage
+        Disk[(💾 Physical Disk / SSD<br/>Badger vlog/sst files)]
+
+        %% Flows
+        ExternalRequest["External Request<br/>(from Master or Client)"] -->|HTTP PUT/GET| HttpLayer
+        HttpLayer -->|Parse Request| LogicLayer
+        LogicLayer -->|txn.SetEntry / txn.Get| BadgerEngine
+        BadgerEngine -->|High-Perf IO| Disk
+    end
+
+    style HttpLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    style LogicLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    style BadgerEngine fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px,color:#000
+```
