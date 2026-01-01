@@ -21,7 +21,7 @@ graph TD
     Client[👤 External Client]
 
     %% The Master Server Subsystem
-    subgraph "👑 Master Server (Orchestrator)"
+    subgraph MasterGroup ["👑 Master Server (Orchestrator)"]
         direction TB
         APIGateway["🚪 API Gateway / Load Balancer"]
         ShardingLogic["🧮 Sharding & Router Logic<br/>(Hash(key) → Node IP)"]
@@ -29,7 +29,7 @@ graph TD
     end
 
     %% The Cluster of Storage Nodes
-    subgraph "🧱 Storage Cluster (Data Nodes)"
+    subgraph StorageCluster ["🧱 Storage Cluster (Data Nodes)"]
         direction LR
         Node1[("📦 Node 1<br/>(:3001)")]
         Node2[("📦 Node 2<br/>(:3002)")]
@@ -41,12 +41,12 @@ graph TD
     APIGateway --> ShardingLogic
     ShardingLogic -.->|"Lookup Active Nodes"| MetadataStore
     
-    %% Replication Flow (Fan-out)
-    ShardingLogic ==>"2. Stream Data (Replica 1)"==> Node1
-    ShardingLogic ==>"2. Stream Data (Replica 2)"==> Node2
-    ShardingLogic -.->|"2. Stream Data (Replica 3 - Optional)"| Node3
+    %% Replication Flow (Fan-out) - FIXED SYNTAX BELOW
+    ShardingLogic ==>|2. Stream Data (Replica 1)| Node1
+    ShardingLogic ==>|2. Stream Data (Replica 2)| Node2
+    ShardingLogic -.->|2. Stream Data (Replica 3 - Optional)| Node3
 
-    %% Node Independence
+    %% Node Indepedence
     Node1 --- Disk1[(Disk 1)]
     Node2 --- Disk2[(Disk 2)]
     Node3 --- Disk3[(Disk 3)]
@@ -57,4 +57,3 @@ graph TD
     style Node1 fill:#e8f5e9,stroke:#2e7d32,color:#000
     style Node2 fill:#e8f5e9,stroke:#2e7d32,color:#000
     style Node3 fill:#e8f5e9,stroke:#2e7d32,color:#000
-```
