@@ -1,0 +1,40 @@
+# --- Go Build Artifacts ---
+# Binaries (Output of 'go build')
+/storage-node
+/master-server
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binaries (Output of 'go test -c')
+*.test
+*.out
+
+# --- Go Workspace (Optional) ---
+# It is standard practice to IGNORE go.work because it is 
+# specific to your local machine's folder structure.
+go.work
+go.work.sum
+
+# --- BadgerDB Data (CRITICAL) ---
+# You never want to commit your database files!
+# These match the defaults we discussed earlier.
+/tmp/badger
+/tmp/data
+/data/
+*.vlog
+*.sst
+MANIFEST
+KEYREGISTRY
+
+# --- IDE & OS Files ---
+# Mac
+.DS_Store
+
+# VSCode
+.vscode/
+
+# IntelliJ / GoLand
+.idea/
+*.iml
